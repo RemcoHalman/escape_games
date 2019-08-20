@@ -22,19 +22,19 @@
 const byte numSockets = 10;
 
 // Wire pin setup
-const int socket1 = 12;
-const int socket2 = 11;
-const int socket3 = 10;
-const int socket4 = 9;
-const int socket5 = A2;
-const int red = 8;    // Cable color
-const int blue = 7;   // Cable color
-const int green = 4;  // Cable color
-const int yellow = 2; // Cable color
-const int black = A3; // Cable color
+const int socket1 = 6; // Socket 0
+const int socket2 = 5; // Socket 1
+const int socket3 = 4; // Socket 2
+const int socket4 = 3; // Socket 3
+const int socket5 = 2; // Socket 4
+const int red = 7;     // Cable color 0
+const int blue = 8;    // Cable color 1
+const int green = 11;  // Cable color 2
+const int yellow = 9;  // Cable color 3
+const int black = 10;  // Cable color 4
 // Switches setup
-const int switches_output = A4;
-const int switches_state = A5;
+const int switches_state = A1;
+int valSwitches_state = 0;
 
 int toggleSwitches = 0;
 
@@ -60,7 +60,7 @@ const byte numConnections = 5;
 // The connections that need to be made between pins, referenced by their index in the signalPins array
 
 // secquence 1
-const byte connections[numConnections][2] = {{0, 5}, {1, 7}, {2, 6}, {3, 8}, {4, 9}};
+const byte connections[numConnections][2] = {{0, 8}, {1, 5}, {2, 7}, {3, 6}, {4, 9}};
 
 // GLOBAL VARIABLES
 // Track state of which output pins are correctly connected
@@ -90,43 +90,18 @@ void setup()
     // We also initialise all the LED pins as ouput
     // Here to set RGB LED to show correct state
     // pinmode
-    pinMode(ledRed, OUTPUT);
-    pinMode(ledBlue, OUTPUT);
-    pinMode(ledGreen, OUTPUT);
     pinMode(state_puzzel, OUTPUT);
 
-    pinMode(switches_output, OUTPUT);
     pinMode(switches_state, INPUT_PULLUP);
 
     digitalWrite(state_puzzel, LOW);
-    LedRed();
+    // LedRed();
   }
 
 // Serial connection used only for monitoring / debugging
 #ifdef DEBUG
   Serial.begin(9600);
   Serial.println(F("Serial communication started"));
-  Serial.println(F("Correct pins are:"));
-  //
-  Serial.print("pin ");
-  Serial.print(socket1);
-  Serial.print(" and pin ");
-  Serial.println(red);
-  //
-  Serial.print("pin ");
-  Serial.print(socket2);
-  Serial.print(" and pin ");
-  Serial.println(green);
-  //
-  Serial.print("pin ");
-  Serial.print(socket3);
-  Serial.print(" and pin ");
-  Serial.println(blue);
-  //
-  Serial.print("pin ");
-  Serial.print(socket4);
-  Serial.print(" and pin ");
-  Serial.println(yellow);
 #endif
 
   puzzleState = Running;
@@ -188,23 +163,28 @@ void loop()
 #endif
   }
 
-  if (switches_state == HIGH)
+  valSwitches_state = digitalRead(A1);
+  // delay(100);
+  // Serial.println(valSwitches_state);
+  if (valSwitches_state == 1)
   {
     toggleSwitches = 1;
+    // Serial.println("on");
   }
-  else if (switches_state == LOW)
+  else if (valSwitches_state != 1)
   {
     toggleSwitches = 0;
+    // Serial.println("Off");
   }
 
   // If the state of the puzzle has changed
-  if (AllWiresCorrect && puzzleState == Running && toggleSwitches == 0)
+  if (AllWiresCorrect && puzzleState == Running && toggleSwitches == 1)
   {
     onSolve();
   }
 
   // If the state of the puzzle has changed
-  else if (!AllWiresCorrect && puzzleState == Solved && toggleSwitches == 1)
+  else if (!AllWiresCorrect && puzzleState == Solved && toggleSwitches != 1)
   {
     onUnsolve();
   }
@@ -219,7 +199,7 @@ void onSolve()
   Serial.println(F("The puzzle has been solved!"));
 #endif
   digitalWrite(state_puzzel, HIGH);
-  LedGreen();
+  // LedGreen();
   puzzleState = Solved;
 };
 
@@ -232,7 +212,7 @@ void onUnsolve()
   Serial.println(F("The puzzle is no longer solved!"));
 #endif
   digitalWrite(state_puzzel, LOW);
-  LedRed();
+  // LedRed();
   puzzleState = Running;
 }
 
